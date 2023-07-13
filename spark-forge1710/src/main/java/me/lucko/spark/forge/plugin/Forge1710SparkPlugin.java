@@ -20,36 +20,33 @@
 
 package me.lucko.spark.forge.plugin;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import me.lucko.spark.common.SparkPlatform;
-import me.lucko.spark.common.SparkPlugin;
-import me.lucko.spark.forge.Forge1710CommandSender;
-import me.lucko.spark.forge.Forge1710SparkMod;
-import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
+import me.lucko.spark.common.SparkPlatform;
+import me.lucko.spark.common.SparkPlugin;
+import me.lucko.spark.forge.Forge1710CommandSender;
+import me.lucko.spark.forge.Forge1710SparkMod;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class Forge1710SparkPlugin implements SparkPlugin, ICommand {
 
-    private final Forge1710SparkMod mod;
-    private final Logger logger;
     protected final ScheduledExecutorService scheduler;
     protected final SparkPlatform platform;
+    private final Forge1710SparkMod mod;
+    private final Logger logger;
 
-    protected Forge1710SparkPlugin(Forge1710SparkMod mod) {
+    protected Forge1710SparkPlugin(final Forge1710SparkMod mod) {
         this.mod = mod;
         this.logger = LogManager.getLogger("spark");
         this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread thread = Executors.defaultThreadFactory().newThread(r);
+            final Thread thread = Executors.defaultThreadFactory().newThread(r);
             thread.setName("spark-forge-async-worker");
             thread.setDaemon(true);
             return thread;
@@ -79,12 +76,12 @@ public abstract class Forge1710SparkPlugin implements SparkPlugin, ICommand {
     }
 
     @Override
-    public void executeAsync(Runnable task) {
+    public void executeAsync(final Runnable task) {
         this.scheduler.execute(task);
     }
 
     @Override
-    public void log(Level level, String msg) {
+    public void log(final Level level, final String msg) {
         if (level == Level.INFO) {
             this.logger.info(msg);
         } else if (level == Level.WARNING) {
@@ -100,46 +97,41 @@ public abstract class Forge1710SparkPlugin implements SparkPlugin, ICommand {
 
     @Override
     public String getCommandName() {
-        return getCommandName();
+        return this.getCommandName();
     }
 
     @Override
-    public String getCommandUsage(ICommandSender iCommandSender) {
-        return "/" + getCommandName();
+    public String getCommandUsage(final ICommandSender iCommandSender) {
+        return "/" + this.getCommandName();
     }
 
     @Override
     public List<String> getCommandAliases() {
-        return Collections.singletonList(getCommandName());
+        return Collections.singletonList(this.getCommandName());
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args) {
+    public void processCommand(final ICommandSender sender, final String[] args) {
         this.platform.executeCommand(new Forge1710CommandSender(sender, this), args);
     }
 
     @Override
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args) {
+    public List<String> addTabCompletionOptions(final ICommandSender sender, final String[] args) {
         return this.platform.tabCompleteCommand(new Forge1710CommandSender(sender, this), args);
     }
 
     @Override
-    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+    public boolean canCommandSenderUseCommand(final ICommandSender sender) {
         return this.platform.hasPermissionForAnyCommand(new Forge1710CommandSender(sender, this));
     }
 
     @Override
-    public boolean isUsernameIndex(String[] strings, int i) {
+    public boolean isUsernameIndex(final String[] strings, final int i) {
         return false;
     }
 
     @Override
-    public int compareTo(Object o) {
-        return getCommandName().compareTo(((ICommand)o).getCommandName());
+    public int compareTo(final Object o) {
+        return this.getCommandName().compareTo(((ICommand) o).getCommandName());
     }
-    
-    protected boolean isOp(EntityPlayer player) {
-       return FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().canSendCommands(player.getGameProfile());
-    }
-
 }
